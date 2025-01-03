@@ -103,29 +103,5 @@ if [ "${SSL_ENABLE}" = "true" ]; then
   }' /etc/nginx/conf.d/${SERVER}.conf
   echo "SSL is enabled, the https.conf file has been included."
 
-  # SSL_DOMAIN、SSL变量替换
-  cd / && /bin/sh /check_certificate
-  if [ $? -ne 0 ]; then
-    echo "In SSL mode, certificate verification failed, exiting the program."
-    exit 1
-  fi
-
-  # 清空定时任务
-  crontab -d
-  # 将新的定时任务写入crontab
-  echo "${SSL_CRON} cd / && /bin/sh /check_certificate" | crontab -
-  # 重启cron服务使修改生效
-  pkill -f crond
-  /usr/sbin/crond
-  echo "The scheduled task '${SSL_CRON} cd / && /bin/sh /check_certificate' has been written."
-else
-    sed -i '/include \/etc\/nginx\/conf.d\/includes\/https\.conf;/ {
-        s/.*//;
-        a\#include \/etc\/nginx\/conf.d\/includes\/https.conf;
-        d
-    }' /etc/nginx/conf.d/${SERVER}.conf
-    echo "SSL is disabled, the https.conf file has been commented out."
-fi
-
 # 后台启动nginx
 nginx -g "daemon off;"
