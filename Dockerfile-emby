@@ -3,14 +3,15 @@ FROM alpine:latest
 # 环境变量
 ENV LANG="C.UTF-8" \
     TZ="Asia/Shanghai" \
-    NGINX_PORT="8091" \
-    NGINX_SSL_PORT="8095" \
-    REPO_URL="https://github.com/chen3861229/embyExternalUrl" \
+    NGINX_PORT="8080" \
+    NGINX_SSL_PORT="2096" \
+    REPO_URL="https://github.com/shixiaolong777/embyExternalUrl" \
     SSL_ENABLE="false" \
     SSL_CRON="0 /2   " \
     SSL_DOMAIN="" \
-    AUTO_UPDATE="false" \
+    AUTO_UPDATE="true" \
     SERVER="emby"
+
 
 # 安装git
 RUN apk --no-cache add nginx nginx-mod-http-js curl busybox git openssl logrotate tzdata && \
