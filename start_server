@@ -102,6 +102,6 @@ if [ "${SSL_ENABLE}" = "true" ]; then
       d
   }' /etc/nginx/conf.d/${SERVER}.conf
   echo "SSL is enabled, the https.conf file has been included."
-
+fi
 # 后台启动nginx
 nginx -g "daemon off;"
