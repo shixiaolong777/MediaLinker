@@ -112,12 +112,14 @@ if [ -n "${NGINX_SSL_PORT}" ]; then
     sed -i "s/8095/${NGINX_SSL_PORT}/g" "/etc/nginx/conf.d/includes/https.conf"
 fi
 
-# SSL 开启
+# SSL开启
 if [ "${SSL_ENABLE}" = "true" ]; then
-    sed -i '/#\s*include \/etc\/nginx\/conf.d\/includes\/https\.conf;/s/^#//' /etc/nginx/conf.d/${SERVER}.conf
-    grep -q "include /etc/nginx/conf.d/includes/https.conf;" /etc/nginx/conf.d/${SERVER}.conf || \
-        echo "include /etc/nginx/conf.d/includes/https.conf;" >> /etc/nginx/conf.d/${SERVER}.conf
-    echo "SSL is enabled, the https.conf file has been included."
+  sed -i '/#\s*include \/etc\/nginx\/conf.d\/includes\/https\.conf;/ {
+      s/^#//;
+      a\include \/etc\/nginx\/conf.d\/includes\/https.conf;
+      d
+  }' /etc/nginx/conf.d/${SERVER}.conf
+  echo "SSL is enabled, the https.conf file has been included."
 fi
 
 # 检查 Nginx 配置并启动
