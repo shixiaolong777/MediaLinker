@@ -88,21 +88,38 @@ else
   fi
 fi
 
-# 替换http、https端口
+# 确保环境变量已定义
+if [ -z "${NGINX_PORT}" ]; then
+    echo "Error: NGINX_PORT is not set."
+    exit 1
+fi
+if [ -n "${SSL_ENABLE}" ] && [ "${SSL_ENABLE}" = "true" ] && [ -z "${NGINX_SSL_PORT}" ]; then
+    echo "Error: NGINX_SSL_PORT is not set while SSL is enabled."
+    exit 1
+fi
+if [ -z "${SERVER}" ]; then
+    echo "Error: SERVER variable is not set."
+    exit 1
+fi
+if [ ! -f "/etc/nginx/conf.d/${SERVER}.conf" ]; then
+    echo "Error: Configuration file /etc/nginx/conf.d/${SERVER}.conf does not exist."
+    exit 1
+fi
+
+# 替换端口
 sed -i "s/8091/${NGINX_PORT}/g" "/etc/nginx/conf.d/includes/http.conf"
 if [ -n "${NGINX_SSL_PORT}" ]; then
-  sed -i "s/8095/${NGINX_SSL_PORT}/g" "/etc/nginx/conf.d/includes/https.conf"
+    sed -i "s/8095/${NGINX_SSL_PORT}/g" "/etc/nginx/conf.d/includes/https.conf"
 fi
 
-# SSL开启
+# SSL 开启
 if [ "${SSL_ENABLE}" = "true" ]; then
-  sed -i '/#\s*include \/etc\/nginx\/conf.d\/includes\/https\.conf;/ {
-      s/^#//;
-      a\include \/etc\/nginx\/conf.d\/includes\/https.conf;
-      d
-  }' /etc/nginx/conf.d/${SERVER}.conf
-  echo "SSL is enabled, the https.conf file has been included."
-
-# 后台启动nginx
-nginx -g "daemon off;"
+    sed -i '/#\s*include \/etc\/nginx\/conf.d\/includes\/https\.conf;/s/^#//' /etc/nginx/conf.d/${SERVER}.conf
+    grep -q "include /etc/nginx/conf.d/includes/https.conf;" /etc/nginx/conf.d/${SERVER}.conf || \
+        echo "include /etc/nginx/conf.d/includes/https.conf;" >> /etc/nginx/conf.d/${SERVER}.conf
+    echo "SSL is enabled, the https.conf file has been included."
 fi
+
+# 检查 Nginx 配置并启动
+nginx -t || exit 1
+nginx -g "daemon off;"
